@@ -1,4 +1,4 @@
-const NumberRange = require("../models/NumberRange");
+const NumberRange = require("../models/numberRange.js");
 
 // Controlador para guardar o actualizar el único rango de números
 const saveOrUpdateNumberRange = async (req, res) => {
