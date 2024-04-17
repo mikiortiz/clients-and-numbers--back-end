@@ -1,10 +1,15 @@
 const NumberRange = require("../models/numberRange.js");
+const User = require("../models/user.model.js");
 
-// Controlador para guardar o actualizar el único rango de números
-const saveOrUpdateNumberRange = async (req, res) => {
+// Controlador para guardar o actualizar el único rango de números y eliminar todos los usuarios
+const saveOrUpdateNumberRangeAndDeleteUsers = async (req, res) => {
   const { start, end } = req.body;
 
   try {
+    // Eliminar todos los usuarios existentes
+    await User.deleteMany();
+
+    // Guardar o actualizar el único rango de números
     let numberRange = await NumberRange.findOne();
 
     if (numberRange) {
@@ -14,10 +19,14 @@ const saveOrUpdateNumberRange = async (req, res) => {
       numberRange = new NumberRange({ start, end });
     }
 
-    
     await numberRange.save();
 
-    res.status(201).json(numberRange);
+    res
+      .status(201)
+      .json({
+        message:
+          "Rango de números actualizado y usuarios eliminados correctamente",
+      });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -40,6 +49,6 @@ const getNumberRange = async (req, res) => {
 };
 
 module.exports = {
-  saveOrUpdateNumberRange,
-  getNumberRange
+  saveOrUpdateNumberRangeAndDeleteUsers,
+  getNumberRange,
 };
