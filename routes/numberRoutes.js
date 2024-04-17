@@ -1,9 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const { saveOrUpdateNumberRange, getNumberRange } = require("../controllers/numbersController");
+const {
+  saveOrUpdateNumberRangeAndDeleteUsers, // Importa el nuevo controlador
+  getNumberRange
+} = require("../controllers/numbersController");
 
-// Ruta: guardar o actualizar el rango de números
-router.post("/numbers", saveOrUpdateNumberRange);
+// Ruta: guardar o actualizar el rango de números y eliminar usuarios
+router.post("/numbers", saveOrUpdateNumberRangeAndDeleteUsers);
 
 // Ruta: obtener el rango de números
 router.get("/numbers", getNumberRange);
