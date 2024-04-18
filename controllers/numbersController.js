@@ -21,16 +21,14 @@ const saveOrUpdateNumberRangeAndDeleteUsers = async (req, res) => {
 
     await numberRange.save();
 
-    res
-      .status(201)
-      .json({
-        message:
-          "Rango de números actualizado y usuarios eliminados correctamente",
-      });
+    res.status(201).json({
+      message: "Rango de números actualizado y usuarios eliminados correctamente",
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // Controlador para obtener el rango de números y los números dentro del rango
 const getNumberRange = async (req, res) => {

@@ -1,14 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const {
-  saveOrUpdateNumberRangeAndDeleteUsers, // Importa el nuevo controlador
-  getNumberRange
+  saveOrUpdateNumberRangeAndDeleteUsers,
+  getNumberRange,
 } = require("../controllers/numbersController");
+const  authRequired  = require("../middlewares/validateToken");
 
 // Ruta: guardar o actualizar el rango de números y eliminar usuarios
-router.post("/numbers", saveOrUpdateNumberRangeAndDeleteUsers);
+router.post("/numbers", authRequired, saveOrUpdateNumberRangeAndDeleteUsers);
 
 // Ruta: obtener el rango de números
-router.get("/numbers", getNumberRange);
+router.get("/numbers", authRequired, getNumberRange);
 
 module.exports = router;
