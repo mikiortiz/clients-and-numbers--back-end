@@ -6,6 +6,7 @@ const connectDB = require("./connectDB.js");
 const cors = require("cors");
 
 // Importación de rutas
+const authRouter= require("./routes/authRegister.routes.js");
 const userRoutes = require("./routes/userRoutes.js");
 const numberRoutes = require("./routes/numberRoutes.js");
 
@@ -29,6 +30,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(cors());
 
 // Montar rutas
+app.use("/api", authRouter);
 app.use("/api", userRoutes);
 app.use("/api", numberRoutes);
 
