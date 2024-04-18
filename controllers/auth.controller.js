@@ -1,16 +1,23 @@
-const UserRegister = require("../models/userRegister.model.js");
+const userRegistration = require("../models/userRegister.model.js");
+const bcrypt = require("bcryptjs");
+const { createAccessToken } = require("../libs/jwt.js");
 
 const register = async (req, res) => {
   const { email, password, username } = req.body;
 
   try {
-    const newUser = new UserRegister({
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const newUser = new userRegistration({
       username,
       email,
-      password, // Aquí asumimos que `password` ya está en formato de hash almacenado
+      password: passwordHash,
     });
 
     const userSaved = await newUser.save();
+    const token = await createAccessToken({ id: userSaved._id });
+
+    res.cookie("token", token);
 
     res.json({
       id: userSaved._id,
@@ -25,12 +32,23 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  const { email } = req.body;
+  const { email, password } = req.body;
 
   try {
-    const userFound = await UserRegister.findOne({ email });
+    const userFound = await userRegistration.findOne({ email });
     if (!userFound)
-      return res.status(400).json({ message: "Usuario no encontrado" });
+      return res.status(400).json({ message: "usuario no encontrado" });
+
+    const isMatch = await bcrypt.compare(password, userFound.password);
+
+    if (!isMatch)
+      return res
+        .status(400)
+        .json({ message: "los datos ingresados no son validos" });
+
+    const token = await createAccessToken({ id: userFound._id });
+
+    res.cookie("token", token);
 
     res.json({
       id: userFound._id,
@@ -52,9 +70,9 @@ const logout = (req, res) => {
 };
 
 const profile = async (req, res) => {
-  const userFound = await UserRegister.findById(req.user.id);
+  const userFound = await userRegistration.findById(req.user.id);
   if (!userFound)
-    return res.status(400).json({ message: "Usuario no encontrado" });
+    return res.status(400).json({ message: "usuario no encontrado" });
 
   return res.json({
     id: userFound._id,
