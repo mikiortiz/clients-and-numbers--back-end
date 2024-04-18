@@ -5,7 +5,7 @@ const { createUser, getUsers, getUser, addNumber } = require('../controllers/use
 const router = express.Router();
 
 // Definición de rutas
-router.post('/register', createUser);
+router.post('/scheduleUser', createUser);
 router.get('/users', getUsers);
 router.get('/users/:identifier', getUser);
 router.post('/add-number', addNumber);
