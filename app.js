@@ -14,20 +14,24 @@ const app = express();
 
 // Coneccón a base de datos
 connectDB();
+//configuración cors
+const corsOptions = {
+  origin: "http://localhost:5173",
+  credentials: true, // Permitir credenciales en las solicitudes
+};
 
 // Configuración del motor de vistas
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
 
 // Middlewares
+app.use(cors(corsOptions));
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 app.use(express.static(path.join(__dirname, "public")));
-
-app.use(cors());
 
 // Montar rutas
 app.use("/api", authRouter);
