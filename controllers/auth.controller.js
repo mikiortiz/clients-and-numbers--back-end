@@ -1,5 +1,7 @@
 const userRegistration = require("../models/userRegister.model.js");
 const bcrypt = require("bcryptjs");
+const { TOKEN_SECRET } = require("../config.js");
+const jwt = require("jsonwebtoken");
 const { createAccessToken } = require("../libs/jwt.js");
 
 const register = async (req, res) => {
@@ -83,9 +85,29 @@ const profile = async (req, res) => {
   });
 };
 
+const verifyToken = async (req, res) => {
+  const { token } = req.cookies;
+
+  if (!token) return res.status(401).json({ message: "no autorizado" });
+
+  jwt.verify(token, TOKEN_SECRET, async (error, user) => {
+    if (error) return res.status(401).json({ message: "no autorizado" });
+
+    const userFound = await userRegistration.findById(user.id);
+    if (!userFound) return res.status(401).json({ message: "no autorizado" });
+
+    return res.json({
+      id: userFound._id,
+      username: userFound.username,
+      email: userFound.email,
+    });
+  });
+};
+
 module.exports = {
   register,
   login,
   logout,
   profile,
+  verifyToken,
 };
