@@ -3,18 +3,34 @@ const { TOKEN_SECRET } = require("../config.js");
 
 // Middleware de autenticación requerida
 const authRequired = (req, res, next) => {
-  const { token } = req.cookies;
-  console.log(token);
+  const token = req.headers.authorization;
+
+  console.log("Token recibido:", token);
 
   if (!token) {
-    return res.status(401).json({ message: "No hay token, autorización denegada" });
+    console.log("No se proporcionó un token, autorización denegada");
+    return res
+      .status(401)
+      .json({ message: "No se proporcionó un token, autorización denegada" });
   }
 
-  jwt.verify(token, TOKEN_SECRET, (error, user) => {
+  const tokenParts = token.split(" ");
+
+  if (tokenParts.length !== 2 || tokenParts[0] !== "Bearer") {
+    console.log("Token inválido o mal formateado");
+    return res.status(401).json({ message: "Token inválido o mal formateado" });
+  }
+
+  const jwtToken = tokenParts[1];
+
+  jwt.verify(jwtToken, TOKEN_SECRET, (error, decoded) => {
     if (error) {
-      return res.status(403).json({ message: "Token inválido" });
+      console.log("Error al verificar el token:", error.message);
+      return res.status(403).json({ message: "Token inválido o expirado" });
     }
-    req.user = user; 
+
+    console.log("Token verificado correctamente. Decodificado:", decoded);
+    req.user = decoded;
     next();
   });
 };

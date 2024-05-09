@@ -1,4 +1,5 @@
-const userRegistration = require("../models/userRegister.model.js");
+const userRegistration = require("../models/userRegister.model.js"); // Importa el modelo userRegistration en lugar de User
+const { registerSchema, loginSchema } = require("../schemas/schemas.validator.js");
 const bcrypt = require("bcryptjs");
 const { TOKEN_SECRET } = require("../config.js");
 const jwt = require("jsonwebtoken");
@@ -8,19 +9,27 @@ const register = async (req, res) => {
   const { email, password, username } = req.body;
 
   try {
+    // Validar el esquema de validación Yup
+    await registerSchema.validate(
+      { email, password, username },
+      { abortEarly: false }
+    );
+
     const passwordHash = await bcrypt.hash(password, 10);
+    const userFound = await userRegistration.findOne({ email }); // Utiliza userRegistration en lugar de User
 
-    const newUser = new userRegistration({
-      username,
-      email,
-      password: passwordHash,
-    });
+    if (userFound) {
+      return res
+        .status(409)
+        .json({ message: "El correo electrónico ya está en uso" });
+    }
 
+    const newUser = new userRegistration({ username, email, password: passwordHash }); // Utiliza userRegistration en lugar de User
     const userSaved = await newUser.save();
+
     const token = await createAccessToken({ id: userSaved._id });
 
-    res.cookie("token", token);
-
+    res.setHeader("Authorization", `Bearer ${token}`);
     res.json({
       id: userSaved._id,
       username: userSaved.username,
@@ -29,7 +38,20 @@ const register = async (req, res) => {
       updatedAt: userSaved.updatedAt,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    // Manejo de errores de validación Yup
+    if (error.name === "ValidationError") {
+      const yupErrors = error.inner.map((err) => ({
+        field: err.path,
+        message: err.message,
+      }));
+      return res.status(400).json({ errors: yupErrors });
+    }
+    // Otros errores del servidor
+    console.error("Error al registrar:", error);
+    res.status(500).json({
+      error: "registration_failed",
+      message: "Error al registrar el usuario",
+    });
   }
 };
 
@@ -37,7 +59,10 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const userFound = await userRegistration.findOne({ email });
+    // Validar el esquema de validación Yup para inicio de sesión
+    await loginSchema.validate({ email, password }, { abortEarly: false });
+
+    const userFound = await userRegistration.findOne({ email }); // Utiliza userRegistration en lugar de User
     if (!userFound)
       return res.status(400).json({ message: "usuario no encontrado" });
 
@@ -46,12 +71,11 @@ const login = async (req, res) => {
     if (!isMatch)
       return res
         .status(400)
-        .json({ message: "los datos ingresados no son validos" });
+        .json({ message: "los datos ingresados no son válidos" });
 
     const token = await createAccessToken({ id: userFound._id });
 
-    res.cookie("token", token);
-
+    res.setHeader("Authorization", `Bearer ${token}`);
     res.json({
       id: userFound._id,
       username: userFound.username,
@@ -60,14 +84,26 @@ const login = async (req, res) => {
       updatedAt: userFound.updatedAt,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    // Manejo de errores de validación Yup para inicio de sesión
+    if (error.name === "ValidationError") {
+      const yupErrors = error.inner.map((err) => ({
+        field: err.path,
+        message: err.message,
+      }));
+      return res.status(400).json({ errors: yupErrors });
+    }
+
+    // Otros errores del servidor
+    console.error("Error al iniciar sesión:", error);
+    res.status(500).json({ message: "Error al iniciar sesión" });
   }
 };
 
 const logout = (req, res) => {
-  res.cookie("token", "", {
-    expires: new Date(0),
-  });
+  // Eliminar el token del localStorage
+  // Esta parte del código está más relacionada con el cliente (frontend)
+  // No es necesario manipular el token en el backend para realizar logout
+  // El frontend debe encargarse de eliminar el token del almacenamiento local
   return res.sendStatus(200);
 };
 
@@ -86,13 +122,14 @@ const profile = async (req, res) => {
 };
 
 const verifyToken = async (req, res) => {
-  const { token } = req.cookies;
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1]; // Extraer el token de Authorization header
 
   if (!token) return res.status(401).json({ message: "no autorizado" });
 
   jwt.verify(token, TOKEN_SECRET, async (error, user) => {
     if (error) return res.status(401).json({ message: "no autorizado" });
-
+    
     const userFound = await userRegistration.findById(user.id);
     if (!userFound) return res.status(401).json({ message: "no autorizado" });
 
@@ -111,3 +148,4 @@ module.exports = {
   profile,
   verifyToken,
 };
+
