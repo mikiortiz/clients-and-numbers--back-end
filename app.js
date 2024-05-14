@@ -6,7 +6,7 @@ const connectDB = require("./connectDB.js");
 const cors = require("cors");
 
 // Importación de rutas
-const authRouter= require("./routes/authRegister.routes.js");
+const authRouter = require("./routes/authRegister.routes.js");
 const userRoutes = require("./routes/userRoutes.js");
 const numberRoutes = require("./routes/numberRoutes.js");
 
@@ -16,8 +16,9 @@ const app = express();
 connectDB();
 //configuración cors
 const corsOptions = {
-  origin: "http://localhost:5174",
-  credentials: true, // Permitir credenciales en las solicitudes
+  origin: "https://clients-and-numbers.netlify.app/",
+  credentials: true,
+  exposedHeaders: ["authorization"],
 };
 
 // Configuración del motor de vistas

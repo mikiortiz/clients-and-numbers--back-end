@@ -5,9 +5,8 @@ const {
   getUser,
   addNumber,
 } = require("../controllers/userController.js");
-const  authRequired  = require("../middlewares/validateToken");
+const authRequired = require("../middlewares/validateToken");
 
-// Creación del enrutador
 const router = express.Router();
 
 // Definición de rutas

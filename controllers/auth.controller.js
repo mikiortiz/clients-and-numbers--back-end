@@ -1,5 +1,8 @@
 const userRegistration = require("../models/userRegister.model.js"); // Importa el modelo userRegistration en lugar de User
-const { registerSchema, loginSchema } = require("../schemas/schemas.validator.js");
+const {
+  registerSchema,
+  loginSchema,
+} = require("../schemas/schemas.validator.js");
 const bcrypt = require("bcryptjs");
 const { TOKEN_SECRET } = require("../config.js");
 const jwt = require("jsonwebtoken");
@@ -24,7 +27,11 @@ const register = async (req, res) => {
         .json({ message: "El correo electrónico ya está en uso" });
     }
 
-    const newUser = new userRegistration({ username, email, password: passwordHash }); // Utiliza userRegistration en lugar de User
+    const newUser = new userRegistration({
+      username,
+      email,
+      password: passwordHash,
+    }); // Utiliza userRegistration en lugar de User
     const userSaved = await newUser.save();
 
     const token = await createAccessToken({ id: userSaved._id });
@@ -76,6 +83,7 @@ const login = async (req, res) => {
     const token = await createAccessToken({ id: userFound._id });
 
     res.setHeader("Authorization", `Bearer ${token}`);
+    res.setHeader("hola", "chau");
     res.json({
       id: userFound._id,
       username: userFound.username,
@@ -123,13 +131,13 @@ const profile = async (req, res) => {
 
 const verifyToken = async (req, res) => {
   const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1]; // Extraer el token de Authorization header
+  const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) return res.status(401).json({ message: "no autorizado" });
 
   jwt.verify(token, TOKEN_SECRET, async (error, user) => {
     if (error) return res.status(401).json({ message: "no autorizado" });
-    
+
     const userFound = await userRegistration.findById(user.id);
     if (!userFound) return res.status(401).json({ message: "no autorizado" });
 
@@ -148,4 +156,3 @@ module.exports = {
   profile,
   verifyToken,
 };
-

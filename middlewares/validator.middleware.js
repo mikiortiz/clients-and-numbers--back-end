@@ -1,5 +1,3 @@
-// validator.middleware.js
-
 const validatorSchema = (schema) => (req, res, next) => {
   try {
     schema.validateSync(req.body, { abortEarly: false });
@@ -17,4 +15,4 @@ const validatorSchema = (schema) => (req, res, next) => {
   }
 };
 
-module.exports = validatorSchema; // Exporta la función como módulo de CommonJS
+module.exports = validatorSchema;
