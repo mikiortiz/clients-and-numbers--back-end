@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // Definición del esquema del usuario
 const userSchema = new mongoose.Schema({
@@ -15,14 +15,12 @@ const userSchema = new mongoose.Schema({
     unique: true,
   },
   numbers: {
-    type: [String], // Definir como un array de strings
-    default: [], // Inicializar como un array vacío por defecto
+    type: [String],
+    default: [],
     unique: true,
   },
 });
 
-// Creación del modelo de usuario a partir del esquema
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
-// Exportación del modelo de usuario
 module.exports = User;

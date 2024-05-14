@@ -4,7 +4,7 @@ const {
   saveOrUpdateNumberRangeAndDeleteUsers,
   getNumberRange,
 } = require("../controllers/numbersController");
-const  authRequired  = require("../middlewares/validateToken");
+const authRequired = require("../middlewares/validateToken");
 
 // Ruta: guardar o actualizar el rango de números y eliminar usuarios
 router.post("/numbers", authRequired, saveOrUpdateNumberRangeAndDeleteUsers);

@@ -1,5 +1,5 @@
 const User = require("../models/user.model.js");
-const  userSchema  = require("../schemas/userSchema.js");
+const userSchema = require("../schemas/userSchema.js");
 
 // Funciones para la gestión de usuarios
 
@@ -93,8 +93,6 @@ const addNumber = async (req, res) => {
     res.status(500).json({ error: "Error al agregar número" });
   }
 };
-
-// Exportación de las funciones
 
 module.exports = {
   createUser,
