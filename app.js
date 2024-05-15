@@ -1,6 +1,5 @@
 const express = require("express");
 const path = require("path");
-const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const connectDB = require("./connectDB.js");
 const cors = require("cors");
@@ -16,7 +15,7 @@ const app = express();
 connectDB();
 //configuración cors
 const corsOptions = {
-  origin: "https://clients-and-numbers.netlify.app/",
+  origin: "https://clients-and-numbers.netlify.app",
   credentials: true,
   exposedHeaders: ["authorization"],
 };
@@ -30,7 +29,6 @@ app.use(cors(corsOptions));
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
 
 app.use(express.static(path.join(__dirname, "public")));
 
