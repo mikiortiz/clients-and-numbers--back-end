@@ -1,6 +1,7 @@
 const NumberRange = require("../models/numberRangeModel.js");
+const User = require("../models/user.model.js");
 
-// Controlador para guardar o actualizar rango de números para el usuario autenticado
+// Controlador para guardar o actualizar rango de números para el usuario autenticado y eliminar usuarios y números referidos
 const saveOrUpdateNumberRangeAndDeleteUsers = async (req, res) => {
   const { start, end } = req.body;
 
@@ -8,6 +9,9 @@ const saveOrUpdateNumberRangeAndDeleteUsers = async (req, res) => {
   const userId = req.user.id;
 
   try {
+    // Eliminar usuarios referidos
+    await User.deleteMany({ owner: userId });
+
     let numberRange = await NumberRange.findOne({ user: userId });
 
     if (numberRange) {
@@ -20,7 +24,7 @@ const saveOrUpdateNumberRangeAndDeleteUsers = async (req, res) => {
     await numberRange.save();
 
     res.status(201).json({
-      message: "Rango de números guardado o actualizado correctamente",
+      message: "Rango de números guardado o actualizado y usuarios referidos eliminados correctamente",
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
