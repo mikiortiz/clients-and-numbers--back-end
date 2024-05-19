@@ -2,10 +2,11 @@ const User = require("../models/user.model.js");
 const userSchema = require("../schemas/userSchema.js");
 
 // Funciones para la gestión de usuarios
-
 const createUser = async (req, res) => {
+  const userId = req.user.id;
+
   try {
-    console.log("ingresando a funcion de creacion de usuario");
+    console.log("ingresando a función de creación de usuario");
     await userSchema.validate(req.body, { abortEarly: false });
 
     console.log("cargando datos usuario");
@@ -19,6 +20,7 @@ const createUser = async (req, res) => {
       lastName,
       username,
       numbers,
+      owner: userId,
     });
 
     console.log("creando usuario nuevo");
@@ -40,8 +42,11 @@ const createUser = async (req, res) => {
 };
 
 const getUsers = async (req, res) => {
+  const userId = req.user.id;
+
   try {
-    const users = await User.find();
+    // Solo usuarios del usuario en sesión
+    const users = await User.find({ owner: userId });
 
     res.json(users);
   } catch (error) {
@@ -50,10 +55,12 @@ const getUsers = async (req, res) => {
 };
 
 const getUser = async (req, res) => {
-  try {
-    const { identifier } = req.params;
+  const userId = req.user.id;
+  const { identifier } = req.params;
 
+  try {
     const user = await User.findOne({
+      owner: userId,
       $or: [{ username: identifier }, { numbers: identifier }],
     });
 
@@ -67,18 +74,21 @@ const getUser = async (req, res) => {
 };
 
 const addNumber = async (req, res) => {
-  try {
-    const { number } = req.body;
+  const userId = req.user.id;
 
-    const existingUserWithNumber = await User.findOne({ numbers: number });
+  try {
+    const { number, username } = req.body;
+
+    const existingUserWithNumber = await User.findOne({
+      owner: userId,
+      numbers: number,
+    });
 
     if (existingUserWithNumber) {
       return res.status(400).json({ message: "Número ya asociado (Ocupado)" });
     }
 
-    const { username } = req.body;
-
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ owner: userId, username });
 
     if (!user) {
       return res.status(404).json({ message: "Usuario no encontrado" });

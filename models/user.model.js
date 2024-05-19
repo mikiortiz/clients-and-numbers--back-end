@@ -19,6 +19,11 @@ const userSchema = new mongoose.Schema({
     default: [],
     unique: true,
   },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
 });
 
 const User = mongoose.model("User", userSchema);
