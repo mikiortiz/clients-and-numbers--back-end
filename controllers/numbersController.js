@@ -1,37 +1,46 @@
-const NumberRange = require("../models/numberRange.js");
-const User = require("../models/user.model.js");
+const NumberRange = require("../models/numberRangeModel.js");
 
-// Controlador para guardar o actualizar rango de números y eliminar todos los usuarios
+// Controlador para guardar o actualizar rango de números para el usuario autenticado
 const saveOrUpdateNumberRangeAndDeleteUsers = async (req, res) => {
   const { start, end } = req.body;
 
-  try {
-    await User.deleteMany();
+  // ID del usuario de objeto req
+  const userId = req.user.id;
 
-    let numberRange = await NumberRange.findOne();
+  try {
+    let numberRange = await NumberRange.findOne({ user: userId });
 
     if (numberRange) {
       numberRange.start = start;
       numberRange.end = end;
     } else {
-      numberRange = new NumberRange({ start, end });
+      numberRange = new NumberRange({ start, end, user: userId });
     }
 
     await numberRange.save();
 
     res.status(201).json({
-      message:
-        "Rango de números actualizado y usuarios eliminados correctamente",
+      message: "Rango de números guardado o actualizado correctamente",
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// Controlador para obtener el rango de números y los números dentro del rango
+// Controlador para obtener el rango de números del usuario autenticado
 const getNumberRange = async (req, res) => {
+  const userId = req.user.id;
+
   try {
-    const { start, end } = await NumberRange.findOne();
+    const numberRange = await NumberRange.findOne({ user: userId });
+
+    if (!numberRange) {
+      return res
+        .status(404)
+        .json({ message: "No se encontró rango de números para este usuario" });
+    }
+
+    const { start, end } = numberRange;
     const numbersInRange = [];
 
     for (let i = start; i <= end; i++) {
