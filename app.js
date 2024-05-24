@@ -15,7 +15,7 @@ const app = express();
 connectDB();
 //configuración cors
 const corsOptions = {
-  origin: "https://clients-and-numbers.netlify.app",
+  origin: ["https://clients-and-numbers.netlify.app", "http://localhost:5173", "http://localhost:8081"],
   credentials: true,
   exposedHeaders: ["authorization"],
 };
