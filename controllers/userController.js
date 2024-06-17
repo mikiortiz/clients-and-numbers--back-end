@@ -104,9 +104,64 @@ const addNumber = async (req, res) => {
   }
 };
 
+const removeNumber = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const { number, username } = req.body;
+
+    const user = await User.findOne({ owner: userId, username });
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    const index = user.numbers.indexOf(number);
+    if (index > -1) {
+      user.numbers.splice(index, 1);
+      await user.save();
+      res.status(200).json({ message: "Número desasociado exitosamente" });
+    } else {
+      res.status(400).json({ message: "Número no asociado al usuario" });
+    }
+  } catch (error) {
+    console.error("Error al desasociar número:", error);
+    res.status(500).json({ error: "Error al desasociar número" });
+  }
+};
+
+const updateUser = async (req, res) => {
+  const userId = req.user.id;
+  const { identifier } = req.params;
+
+  try {
+    const user = await User.findOne({ owner: userId, _id: identifier });
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    const { firstName, lastName, username } = req.body;
+
+    user.firstName = firstName || user.firstName;
+    user.lastName = lastName || user.lastName;
+    user.username = username || user.username;
+
+    await user.save();
+
+    res.status(200).json({ message: "Usuario actualizado exitosamente", user });
+  } catch (error) {
+    console.error("Error al actualizar usuario:", error);
+    res.status(500).json({ error: "Error al actualizar usuario" });
+  }
+};
+
 module.exports = {
   createUser,
   getUsers,
   getUser,
   addNumber,
+  removeNumber,
+  updateUser, // Añade esto
 };
+
